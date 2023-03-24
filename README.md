@@ -63,6 +63,6 @@ Overall, the SQL API provides a powerful way to interact with relational databas
 <dependency>
     <groupId>dev.eztxm.sql</groupId>
     <artifactId>SQL-API</artifactId>
-    <version>1.0.0</version>
+    <version>1.0</version>
 </dependency>
 ```
