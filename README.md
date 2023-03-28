@@ -20,7 +20,7 @@ For SQLite, you can use the following code to connect to a database:
 
 ```java
 String databaseName = "mydatabase.db";
-String path = "/path/to/my/database/folder";
+String path = "path/to/my/database/folder";
 
 SQLiteConnection connection = new SQLiteConnection(path, databaseName);
 ```
