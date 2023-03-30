@@ -57,7 +57,7 @@ Overall, the SQL API provides a powerful way to interact with relational databas
 ```xml
 <repository>
     <id>eztxm-repo</id>
-    <url>https://eztxm.dev/repo</url>
+    <url>https://maven.eztxm.dev/repo</url>
 </repository>
 
 <dependency>
