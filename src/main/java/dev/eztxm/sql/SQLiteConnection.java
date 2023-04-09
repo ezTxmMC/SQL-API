@@ -1,73 +1,46 @@
 package dev.eztxm.sql;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 import java.sql.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 public class SQLiteConnection {
-    private final LoadingCache<Integer, Connection> connectionCache;
+    private final Connection connection;
 
     public SQLiteConnection(String databaseName) {
-        this.connectionCache = CacheBuilder.newBuilder().expireAfterAccess(10L, TimeUnit.SECONDS).removalListener(notification -> {
-            if (notification.getValue() != null) {
-                try {
-                    ((Connection) notification.getValue()).close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }).build(new CacheLoader<>() {
-            @NotNull
-            @Override
-            public Connection load(@NotNull Integer key) throws Exception {
-                return DriverManager.getConnection("jdbc:sqlite:" + databaseName + ".db");
-            }
-        });
+        try {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + databaseName + ".db");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public SQLiteConnection(String path, String databaseName) {
         File folder = new File(path);
         if (!folder.exists()) folder.mkdir();
-        this.connectionCache = CacheBuilder.newBuilder().expireAfterAccess(10L, TimeUnit.SECONDS).removalListener(notification -> {
-            if (notification.getValue() != null) {
-                try {
-                    ((Connection) notification.getValue()).close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }).build(new CacheLoader<>() {
-            @NotNull
-            @Override
-            public Connection load(@NotNull Integer key) throws Exception {
-                return DriverManager.getConnection("jdbc:sqlite:" + path + "/" + databaseName + ".db");
-            }
-        });
+        try {
+            connection = DriverManager.getConnection("jdbc:sqlite:" + path + "/" + databaseName + ".db");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ResultSet query(String sql, Object... objects) {
         try {
-            PreparedStatement preparedStatement = connectionCache.get(1).prepareStatement(sql);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
             setArguments(objects, preparedStatement);
             return preparedStatement.executeQuery();
-        } catch (SQLException | ExecutionException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void update(String sql, Object... objects) {
         try {
-            PreparedStatement preparedStatement = connectionCache.get(1).prepareStatement(sql);
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
             setArguments(objects, preparedStatement);
             preparedStatement.execute();
             preparedStatement.close();
-        } catch (SQLException | ExecutionException e) {
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
@@ -96,10 +69,6 @@ public class SQLiteConnection {
     }
 
     public Connection getConnection() {
-        try {
-            return connectionCache.get(1);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+        return connection;
     }
 }
