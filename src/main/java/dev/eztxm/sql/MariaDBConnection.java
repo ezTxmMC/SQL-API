@@ -7,7 +7,7 @@ public class MariaDBConnection {
 
     public MariaDBConnection(String url, int port, String database, String username, String password) {
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://" + url + ":" + port + "/" + database + "?user=" + username + "&password=" + password);
+            connection = DriverManager.getConnection("jdbc:mysql://" + url + ":" + port + "/" + database + "?autoReconnect=true", username, password);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
