@@ -1,74 +1,91 @@
 package dev.eztxm.sql;
 
-import java.io.File;
 import java.sql.*;
 
 public class SQLiteConnection {
-    private final Connection connection;
+    private Connection connection;
+    private final String url;
 
-    public SQLiteConnection(String databaseName) {
-        try {
-            connection = DriverManager.getConnection("jdbc:sqlite:" + databaseName + ".db");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    public SQLiteConnection(String url) {
+        this.url = url;
+        connect();
     }
 
-    public SQLiteConnection(String path, String databaseName) {
-        File folder = new File(path);
-        if (!folder.exists()) folder.mkdir();
+    private void connect() {
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:" + path + "/" + databaseName + ".db");
+            connection = DriverManager.getConnection("jdbc:sqlite:" + url);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public ResultSet query(String sql, Object... objects) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            setArguments(objects, preparedStatement);
-            return preparedStatement.executeQuery();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void update(String sql, Object... objects) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            setArguments(objects, preparedStatement);
-            preparedStatement.execute();
-            preparedStatement.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void setArguments(Object[] objects, PreparedStatement preparedStatement) throws SQLException {
-        for (int i = 0; i < objects.length; i++) {
-            Object object = objects[i];
-            if (object instanceof String) {
-                preparedStatement.setString(i + 1, (String) object);
-            } else if (object instanceof Integer) {
-                preparedStatement.setInt(i + 1, (Integer) object);
-            } else if (object instanceof Date) {
-                preparedStatement.setDate(i + 1, (Date) object);
-            } else if (object instanceof Timestamp) {
-                preparedStatement.setTimestamp(i + 1, (Timestamp) object);
-            } else if (object instanceof Boolean) {
-                preparedStatement.setBoolean(i + 1, (Boolean) object);
-            } else if (object instanceof Float) {
-                preparedStatement.setFloat(i + 1, (Float) object);
-            } else if (object instanceof Double) {
-                preparedStatement.setDouble(i + 1, (Double) object);
-            } else if (object instanceof Long) {
-                preparedStatement.setLong(i + 1, (Long) object);
+            System.out.println("Failed to connect to database. Retrying in 5 seconds...");
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
             }
+            connect();
         }
     }
 
-    public Connection getConnection() {
-        return connection;
+    public void createTable(String tableName, String columns) {
+        String sql = "CREATE TABLE " + tableName + " (" + columns + ")";
+        try {
+            Statement statement = connection.createStatement();
+            statement.execute(sql);
+            System.out.println("Table " + tableName + " created successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void update(String tableName, String column, String value, String condition) {
+        String sql = "UPDATE " + tableName + " SET " + column + " = '" + value + "' WHERE " + condition;
+        try {
+            Statement statement = connection.createStatement();
+            int rowsAffected = statement.executeUpdate(sql);
+            System.out.println(rowsAffected + " rows updated in table " + tableName + ".");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void insertInto(String tableName, String values) {
+        String sql = "INSERT INTO " + tableName + " VALUES (" + values + ")";
+        try {
+            Statement statement = connection.createStatement();
+            int rowsAffected = statement.executeUpdate(sql);
+            System.out.println(rowsAffected + " rows inserted into table " + tableName + ".");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteFrom(String tableName, String condition) {
+        String sql = "DELETE FROM " + tableName + " WHERE " + condition;
+        try {
+            Statement statement = connection.createStatement();
+            int rowsAffected = statement.executeUpdate(sql);
+            System.out.println(rowsAffected + " rows deleted from table " + tableName + ".");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ResultSet select(String tableName, String columns, String condition) {
+        String sql = "SELECT " + columns + " FROM " + tableName + " WHERE " + condition;
+        ResultSet resultSet = null;
+        try {
+            Statement statement = connection.createStatement();
+            resultSet = statement.executeQuery(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return resultSet;
+    }
+
+    public void close() {
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
