@@ -4,12 +4,16 @@ import java.sql.*;
 
 public class MariaDBConnection {
     private Connection connection;
-    private final String url;
+    private final String host;
+    private final int port;
+    private final String database;
     private final String username;
     private final String password;
 
-    public MariaDBConnection(String url, String username, String password) {
-        this.url = url;
+    public MariaDBConnection(String host, int port, String database, String username, String password) {
+        this.host = host;
+        this.port = port;
+        this.database = database;
         this.username = username;
         this.password = password;
         connect();
@@ -17,7 +21,7 @@ public class MariaDBConnection {
 
     private void connect() {
         try {
-            connection = DriverManager.getConnection(url, username, password);
+            connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password);
         } catch (SQLException e) {
             System.out.println("Failed to connect to database. Retrying in 5 seconds...");
             try {
