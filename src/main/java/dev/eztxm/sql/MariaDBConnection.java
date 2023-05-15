@@ -30,11 +30,10 @@ public class MariaDBConnection {
     }
 
     public void createTable(String tableName, String columns) {
-        String sql = "CREATE TABLE " + tableName + " (" + columns + ")";
+        String sql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + columns + ")";
         try {
             Statement statement = connection.createStatement();
             statement.execute(sql);
-            System.out.println("Table " + tableName + " created successfully.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -44,8 +43,7 @@ public class MariaDBConnection {
         String sql = "UPDATE " + tableName + " SET " + column + " = '" + value + "' WHERE " + condition;
         try {
             Statement statement = connection.createStatement();
-            int rowsAffected = statement.executeUpdate(sql);
-            System.out.println(rowsAffected + " rows updated in table " + tableName + ".");
+            statement.executeUpdate(sql);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -55,8 +53,7 @@ public class MariaDBConnection {
         String sql = "INSERT INTO " + tableName + " VALUES (" + values + ")";
         try {
             Statement statement = connection.createStatement();
-            int rowsAffected = statement.executeUpdate(sql);
-            System.out.println(rowsAffected + " rows inserted into table " + tableName + ".");
+            statement.executeUpdate(sql);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -66,8 +63,7 @@ public class MariaDBConnection {
         String sql = "DELETE FROM " + tableName + " WHERE " + condition;
         try {
             Statement statement = connection.createStatement();
-            int rowsAffected = statement.executeUpdate(sql);
-            System.out.println(rowsAffected + " rows deleted from table " + tableName + ".");
+            statement.executeUpdate(sql);
         } catch (SQLException e) {
             e.printStackTrace();
         }

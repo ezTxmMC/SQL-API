@@ -26,7 +26,7 @@ public class SQLiteConnection {
     }
 
     public void createTable(String tableName, String columns) {
-        String sql = "CREATE TABLE " + tableName + " (" + columns + ")";
+        String sql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + columns + ")";
         try {
             Statement statement = connection.createStatement();
             statement.execute(sql);
