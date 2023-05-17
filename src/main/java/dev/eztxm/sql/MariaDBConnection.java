@@ -1,9 +1,12 @@
 package dev.eztxm.sql;
 
 import java.sql.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MariaDBConnection {
     private Connection connection;
+    private Timer timer;
     private final String host;
     private final int port;
     private final String database;
@@ -17,19 +20,20 @@ public class MariaDBConnection {
         this.username = username;
         this.password = password;
         connect();
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                checkConnection();
+            }
+        }, 1000, 1000);
     }
 
     private void connect() {
         try {
             connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password);
         } catch (SQLException e) {
-            System.out.println("Failed to connect to database. Retrying in 5 seconds...");
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-            connect();
+            System.out.println("Failed to connect to database.");
         }
     }
 
@@ -43,8 +47,8 @@ public class MariaDBConnection {
         }
     }
 
-    public void update(String tableName, String column, String value, String condition) {
-        String sql = "UPDATE " + tableName + " SET " + column + " = '" + value + "' WHERE " + condition;
+    public void update(String tableName, String column, Object value, String condition) {
+        String sql = "UPDATE " + tableName + " SET " + column + " = " + value + " WHERE " + condition;
         try {
             Statement statement = connection.createStatement();
             statement.executeUpdate(sql);
@@ -93,7 +97,35 @@ public class MariaDBConnection {
         }
     }
 
-    public Connection getConnection() {
-        return connection;
+    private void checkConnection() {
+        try {
+            if (!connection.isValid(1)) {
+                System.out.println("Connection lost. Reconnecting...");
+                reconnect();
+            }
+        } catch (SQLException e) {
+            System.out.println("Connection lost. Reconnecting...");
+            reconnect();
+        }
+    }
+
+    private void reconnect() {
+        try {
+            connection.close();
+        } catch (SQLException ignored) {}
+        connect();
+    }
+
+    public void stopChecking() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+        try {
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Connection checking stopped.");
     }
 }
