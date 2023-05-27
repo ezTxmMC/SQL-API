@@ -57,6 +57,13 @@ public class MariaDBConnection {
         put(sql);
     }
 
+    /**
+     * Diese Methode ist fehlerhaft und sollte nicht verwendet werden.
+     * Es tritt ein Bug auf, dass das ResultSet nicht vorhanden ist.
+     * Eine mögliche Lösung besteht darin, stattdessen die altmodische Methode query() zu verwenden.
+     *
+     * @deprecated Dieser Bug wird in der nächsten Version behoben.
+     */
     public ResultSet select(String tableName, String columns, String condition) {
         String sql = "SELECT " + columns + " FROM " + tableName + " WHERE " + condition;
         try (ResultSet resultSet = query(sql)) {
@@ -113,8 +120,9 @@ public class MariaDBConnection {
             setArguments(objects, preparedStatement);
             return preparedStatement.executeQuery();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
+        return null;
     }
 
     public void put(String sql, Object... objects) {
@@ -124,7 +132,7 @@ public class MariaDBConnection {
             preparedStatement.execute();
             preparedStatement.close();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
@@ -133,35 +141,27 @@ public class MariaDBConnection {
             Object object = objects[i];
             if (object instanceof String) {
                 preparedStatement.setString(i + 1, (String)object);
-                return;
             }
             if (object instanceof Integer) {
                 preparedStatement.setInt(i + 1, (Integer) object);
-                return;
             }
             if (object instanceof Date) {
                 preparedStatement.setDate(i + 1, (Date)object);
-                return;
             }
             if (object instanceof Timestamp) {
                 preparedStatement.setTimestamp(i + 1, (Timestamp)object);
-                return;
             }
             if (object instanceof Boolean) {
                 preparedStatement.setBoolean(i + 1, (Boolean) object);
-                return;
             }
             if (object instanceof Float) {
                 preparedStatement.setFloat(i + 1, (Float) object);
-                return;
             }
             if (object instanceof Double) {
                 preparedStatement.setDouble(i + 1, (Double) object);
-                return;
             }
             if (object instanceof Long) {
                 preparedStatement.setLong(i + 1, (Long) object);
-                return;
             }
         }
     }
