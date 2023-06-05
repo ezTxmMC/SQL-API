@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dev.eztxm.sql</groupId>
     <artifactId>SQL-API</artifactId>
-    <version>1.2-testing2</version>
+    <version>1.2</version>
     <packaging>jar</packaging>
 
     <build>

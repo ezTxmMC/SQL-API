@@ -20,58 +20,42 @@ public class MariaDBConnection {
         this.username = username;
         this.password = password;
         connect();
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
+        this.timer = new Timer();
+        this.timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 checkConnection();
             }
-        }, 1000, 1000);
+        }, 10000L, 5000L);
     }
 
-    private void connect() {
+    public void connect() {
         try {
             connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password);
+            System.out.println("Successfully to connect to database.");
         } catch (SQLException e) {
             System.out.println("Failed to connect to database.");
         }
     }
 
     public void createTable(String tableName, String columns) {
-        String sql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" + columns + ")";
-        put(sql);
+        put("CREATE TABLE IF NOT EXISTS " + tableName + " (" + columns + ")");
     }
 
     public void update(String tableName, String column, Object value, String condition) {
-        String sql = "UPDATE " + tableName + " SET " + column + " = " + value + " WHERE " + condition;
-        put(sql);
+        put("UPDATE " + tableName + " SET " + column + " = " + value + " WHERE " + condition);
     }
 
     public void insertInto(String tableName, String values) {
-        String sql = "INSERT INTO " + tableName + " VALUES (" + values + ")";
-        put(sql);
+        put("INSERT INTO " + tableName + " VALUES (" + values + ")");
     }
 
     public void deleteFrom(String tableName, String condition) {
-        String sql = "DELETE FROM " + tableName + " WHERE " + condition;
-        put(sql);
+        put("DELETE FROM " + tableName + " WHERE " + condition);
     }
 
-    /**
-     * Diese Methode ist fehlerhaft und sollte nicht verwendet werden.
-     * Es tritt ein Bug auf, dass das ResultSet nicht vorhanden ist.
-     * Eine mögliche Lösung besteht darin, stattdessen die altmodische Methode query() zu verwenden.
-     *
-     * @deprecated Dieser Bug wird in der nächsten Version behoben.
-     */
-    public ResultSet select(String tableName, String columns, String condition) {
-        String sql = "SELECT " + columns + " FROM " + tableName + " WHERE " + condition;
-        try (ResultSet resultSet = query(sql)) {
-            return resultSet;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public ResultSet select(String tableName, String columns, String condition, boolean needsCondition) {
+        return query("SELECT " + columns + " FROM " + tableName + (needsCondition ? " WHERE " + condition : ""));
     }
 
     public void close() {
@@ -83,6 +67,11 @@ public class MariaDBConnection {
     }
 
     private void checkConnection() {
+        if (connection == null) {
+            System.out.println("Connection lost. Reconnecting...");
+            reconnect();
+            return;
+        }
         try {
             if (!connection.isValid(1)) {
                 System.out.println("Connection lost. Reconnecting...");
@@ -97,7 +86,9 @@ public class MariaDBConnection {
     private void reconnect() {
         try {
             connection.close();
-        } catch (SQLException ignored) {}
+        } catch (SQLException e) {
+            connection = null;
+        }
         connect();
     }
 
