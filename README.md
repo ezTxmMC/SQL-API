@@ -67,7 +67,7 @@ connection.createTable("customers", "email varchar(255), id bigint(255)");
 ```xml
 <repository>
     <id>eztxm-repo</id>
-    <url>https://maven.eztxm.dev/repo</url>
+    <url>https://maven.eztxm.de/repo</url>
 </repository>
 
 <dependency>
