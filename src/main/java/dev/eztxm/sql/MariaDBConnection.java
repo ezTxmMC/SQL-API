@@ -62,7 +62,7 @@ public class MariaDBConnection {
         try {
             connection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
     }
 
@@ -100,7 +100,7 @@ public class MariaDBConnection {
         try {
             connection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
         System.out.println("Connection checking stopped.");
     }
@@ -111,7 +111,7 @@ public class MariaDBConnection {
             setArguments(objects, preparedStatement);
             return preparedStatement.executeQuery();
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
         return null;
     }
@@ -123,7 +123,7 @@ public class MariaDBConnection {
             preparedStatement.execute();
             preparedStatement.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
     }
 

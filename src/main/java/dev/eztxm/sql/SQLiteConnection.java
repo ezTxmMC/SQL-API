@@ -58,7 +58,7 @@ public class SQLiteConnection {
         try {
             connection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
     }
 
@@ -96,7 +96,7 @@ public class SQLiteConnection {
         try {
             connection.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
         System.out.println("Connection checking stopped.");
     }
@@ -107,7 +107,7 @@ public class SQLiteConnection {
             setArguments(objects, preparedStatement);
             return preparedStatement.executeQuery();
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
         return null;
     }
@@ -119,7 +119,7 @@ public class SQLiteConnection {
             preparedStatement.execute();
             preparedStatement.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.fillInStackTrace();
         }
     }
 
